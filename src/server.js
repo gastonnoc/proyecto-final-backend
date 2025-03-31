@@ -17,12 +17,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors());
-
 app.use(express.json({ limit: '10mb' }));
 
-const uploadDir = path.join(__dirname, 'uploads');
+// Usar carpeta temporal en Vercel
+const uploadDir = '/tmp/uploads';
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir); 
+    fs.mkdirSync(uploadDir, { recursive: true }); 
 }
 
 app.patch('/api/user/profile-image', authMiddleware, (req, res) => {
@@ -44,11 +44,9 @@ app.patch('/api/user/profile-image', authMiddleware, (req, res) => {
                 return res.status(500).json({ message: 'Error al guardar la imagen' });
             }
 
-            const imageUrl = `/uploads/${filename}`; 
-
             return res.status(200).json({
                 message: 'Imagen de perfil actualizada con éxito',
-                imageUrl,
+                imageUrl: `https://${req.headers.host}/tmp/uploads/${filename}`,
             });
         });
     } catch (error) {
